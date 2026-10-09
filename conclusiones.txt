@@ -1,0 +1,31 @@
+
+INFORME DE HALLAZGOS Y CONCLUSIONES - PRUEBAS DE SERVICIOS REST
+
+
+-------------- 1. ELECCIÓN TECNOLÓGICA: KARATE FRAMEWORK -------------
+- Karate interpreta las operaciones HTTP nativamente
+  desde el archivo Feature, reduciendo la superficie de mantenimiento.
+
+--- 2. HALLAZGOS TÉCNICOS Y ESTRATEGIA DE PRUEBA EN SWAGGER PETSTORE -
+* Mitigación de colisiones en entorno público compartido:
+   La API pública de Swagger Petstore recibe N de transacciones concurrentes.
+   Utilizar IDs fijos o genéricos ("id": 0) que puede producir sobreescritura de registros
+   y fallas intermitentes en la consulta posterior por ID.
+   Como solución se implementó un identificador basado en marcas de tiempo
+   mediante 'java.lang.System.currentTimeMillis()', garantizando que cada
+   ejecución sea determinista, aislada e independiente.
+
+* Aserción profunda en catálogos dinámicos:
+   El endpoint 'GET /pet/findByStatus?status=sold' devuelve un arreglo de registros 
+   donde el orden no está garantizado.
+   En lugar de validar posiciones fijas o iterar bucles en código, se utilizó:
+    match response contains deep { id: #(petId), status: 'sold' }
+   Esto verifica la persistencia y presencia exacta del registro modificado
+   dentro de la colección completa.
+
+
+3. RECOMENDACIONES DE MEJORA Y EXTENSIÓN DE SUITE
+----------------------------------------------------------------------
+- Pruebas negativas y validación de contratos:
+  * Incorporar escenarios que comprueben respuestas 404 al consultar IDs
+    inexistentes o 400 ante tipos de datos no válidos.

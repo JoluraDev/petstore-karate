@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Dependencia de Karate con JUnit 5
+    testImplementation('com.intuit.karate:karate-junit5:1.4.1') {
+        // Excluimos versiones viejas de junit para evitar colisiones
+        exclude group: 'org.junit.jupiter'
+    }
+
+    // Forzamos la versión compatible de JUnit 5 que requiere el runner de VS Code
+    testImplementation platform('org.junit:junit-bom:5.9.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.platform:junit-platform-suite'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty "karate.options", System.properties.getProperty("karate.options")
+    systemProperty "karate.env", System.properties.getProperty("karate.env")
+
+    testLogging {
+        showStandardStreams = true
+    }
+}
+
+sourceSets {
+    test {
+        resources {
+            srcDir file('src/test/java')
+            srcDir file('src/test/resources')
+        }
+    }
+}
